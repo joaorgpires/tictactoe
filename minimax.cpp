@@ -9,10 +9,13 @@ using namespace std;
 struct Node {
   char state[3][3];
   int open;
+  int u;
 };
 
 int pl;
 vector<Node> nei;
+bool over = false;
+int winner;
 
 bool terminal_test(Node cur) { //--------------------TERMINAL TEST
   if((cur.state[0][0] == 'X' && cur.state[0][1] == 'X' && cur.state[0][2] == 'X')
@@ -166,14 +169,14 @@ int utility(Node cur) { //-------------------------FUNCTION UTILITY
      || (cur.state[2][0] == 'X' && cur.state[2][1] == 'X' && cur.state[2][2] == 'X')
      || (cur.state[0][0] == 'X' && cur.state[1][1] == 'X' && cur.state[2][2] == 'X')
      || (cur.state[2][0] == 'X' && cur.state[1][1] == 'X' && cur.state[0][2] == 'X'))
-    return W;
+    return W * 10;
   
   else if((cur.state[0][0] == 'X' && cur.state[0][1] == 'X' && cur.state[0][2] == 'X')
 	  || (cur.state[1][0] == 'X' && cur.state[1][1] == 'X' && cur.state[1][2] == 'X')
 	  || (cur.state[2][0] == 'X' && cur.state[2][1] == 'X' && cur.state[2][2] == 'X')
 	  || (cur.state[0][0] == 'X' && cur.state[1][1] == 'X' && cur.state[2][2] == 'X')
 	  || (cur.state[2][0] == 'X' && cur.state[1][1] == 'X' && cur.state[0][2] == 'X'))
-    return L;
+    return L * 10;
   
   else if(cur.open == 0)
     return D;
@@ -194,14 +197,21 @@ Node setVal(Node cur) {
   return next;
 }
 
-void minimax_decision(Node cur) {
-  if(terminal_test(cur))
-    return;
+int max_value();
+int min_value();
 
+void minimax_decision(Node cur) {
+  if(terminal_test(cur)) {
+    winner = utility(cur) / 10;
+    over = true;
+    return;
+  }
+  
   for(int i = 0; i < 3; i++) {
     for(int j = 0; j < 3; j++) {
       if(cur.state[i][j] == '_') {
 	Node next = setVal(cur);
+	next.open--;
 	if(pl == 1)
 	  next.state[i][j] = 'O';
 	else
@@ -210,24 +220,52 @@ void minimax_decision(Node cur) {
       }
     }
   }
+
+  int sz = nei.size();
+  
+  printf("%d\n", sz);
+
   
   if(pl == 1) {
-    
+    int v = min_value();
+    for(int i = 0; i < sz; i++) {
+      Node move = nei[i];
+      if(move.u == v)
+	cur = setVal(move);
+    }
   }
   else {
-    
+    int v = max_value();
+    for(int i = 0; i < sz; i++) {
+      Node move = nei[i];
+      if(move.u == v)
+	cur = setVal(move);
+    }
   }
   
   nei.clear();
-  cur.open--;
 }
 
-void max_value() {
+int max_value() {
+  int v = -INF;
+  int sz = nei.size();
+  for(int i = 0; i < sz; i++) {
+    v = max(utility(nei[i]), v);
+    nei[i].u = v;
+  }
   
+  return v;
 }
 
-void min_value() {
+int min_value() {
+  int v = INF;
+  int sz = nei.size();
+  for(int i = 0; i < sz; i++) {
+    v = min(utility(nei[i]), v);
+    nei[i].u = v;
+  }
   
+  return v;
 }
 
 char xoro(int m) {
@@ -237,6 +275,14 @@ char xoro(int m) {
 }
 
 int main() {
+  Node game;
+  game.open = 9;
+  for(int i = 0; i < 3; i++) {
+    for(int j = 0; j < 3; j++) {
+      game.state[i][j] = '_';
+    }
+  }
+  
   printf("Player 1 or 2? ");
   scanf("%d", &pl); //player1 or player2
   if(pl != 1 && pl != 2) {
@@ -244,5 +290,56 @@ int main() {
     return 0;
   }
   
+  int turn = 1;
+  
+  while(!over) {
+    if(turn == pl) {
+      int I,J;
+      printf("Where do you wish to play?\n");
+      printf("Row: "); scanf("%d", &I);
+      printf("Column: "); scanf("%d", &J);
+    
+      game.state[I][J] = xoro(pl);
+      game.open--;
+    
+      if(terminal_test(game)) {
+	over = true;
+	winner = utility(game) / 10;
+      }
+    
+      for(int i = 0; i < 3; i++) {
+	for(int j = 0; j < 3; j++) {
+	  printf("%c", game.state[i][j]);
+	  if(j != 2)
+	    printf("|");
+	}
+	printf("\n");
+      }
+    }  
+    else {
+      minimax_decision(game);
+      for(int i = 0; i < 3; i++) {
+	for(int j = 0; j < 3; j++) {
+	  printf("%c", game.state[i][j]);
+	  if(j != 2)
+	    printf("|");
+	}
+	printf("\n");
+      }
+    }
+
+    if(pl == 1)
+      turn = 2;
+    else
+      turn = 1;
+  }
+  
+  if(winner == W)
+    printf("Player 1 wins!\n");
+  else if(winner == L)
+    printf("Player 2 wins!\n");
+  else
+    printf("It was a draw!");
+
   return 0;
 }
