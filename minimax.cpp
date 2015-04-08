@@ -2,6 +2,7 @@
 #define W 1
 #define D 0
 #define L -1
+#define INF 1000
 
 using namespace std;
 
@@ -9,6 +10,9 @@ struct Node {
   char state[3][3];
   int open;
 };
+
+int pl;
+vector<Node> nei;
 
 bool terminal_test(Node cur) { //--------------------TERMINAL TEST
   if((cur.state[0][0] == 'X' && cur.state[0][1] == 'X' && cur.state[0][2] == 'X')
@@ -178,29 +182,67 @@ int utility(Node cur) { //-------------------------FUNCTION UTILITY
     return diff(cur);
 }
 
+Node setVal(Node cur) {
+  Node next;
+  next.open = cur.open;
+  for(int i = 0; i < 3; i++) {
+    for(int j = 0; j < 3; j++) {
+      next.state[i][j] = cur.state[i][j];
+    }
+  }
+  
+  return next;
+}
+
 void minimax_decision(Node cur) {
+  if(terminal_test(cur))
+    return;
+
+  for(int i = 0; i < 3; i++) {
+    for(int j = 0; j < 3; j++) {
+      if(cur.state[i][j] == '_') {
+	Node next = setVal(cur);
+	if(pl == 1)
+	  next.state[i][j] = 'O';
+	else
+	  next.state[i][j] = 'X';
+	nei.push_back(next);
+      }
+    }
+  }
+  
+  if(pl == 1) {
+    
+  }
+  else {
+    
+  }
+  
+  nei.clear();
+  cur.open--;
+}
+
+void max_value() {
   
 }
 
-void max_value(Node cur) {
+void min_value() {
   
 }
 
-void min_value(Node cur) {
-  
-}
-
-char xoro(int pl) {
-  if(pl == 1)
+char xoro(int m) {
+  if(m == 1)
     return 'X';
-  
-  else
-    return 'O';
+  return 'O';
 }
 
 int main() {
   printf("Player 1 or 2? ");
-  int pl; scanf("%d", &pl); //player1 or player2
+  scanf("%d", &pl); //player1 or player2
+  if(pl != 1 && pl != 2) {
+    printf("That is not a player. Try again.\n");
+    return 0;
+  }
   
   return 0;
 }
