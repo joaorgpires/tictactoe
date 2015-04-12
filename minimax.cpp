@@ -200,11 +200,11 @@ Node setVal(Node cur) {
 int max_value();
 int min_value();
 
-void minimax_decision(Node cur) {
+Node minimax_decision(Node cur) {
   if(terminal_test(cur)) {
     winner = utility(cur) / 10;
     over = true;
-    return;
+    return cur;
   }
   
   for(int i = 0; i < 3; i++) {
@@ -223,8 +223,7 @@ void minimax_decision(Node cur) {
 
   int sz = nei.size();
   
-  printf("%d\n", sz);
-
+  //printf("%d\n", sz);
   
   if(pl == 1) {
     int v = min_value();
@@ -244,6 +243,7 @@ void minimax_decision(Node cur) {
   }
   
   nei.clear();
+  return cur;
 }
 
 int max_value() {
@@ -296,17 +296,25 @@ int main() {
     if(turn == pl) {
       int I,J;
       printf("Where do you wish to play?\n");
-      printf("Row: "); scanf("%d", &I);
-      printf("Column: "); scanf("%d", &J);
-    
-      game.state[I][J] = xoro(pl);
+      bool legal = false;
+      while(!legal) {
+	printf("Row: "); scanf("%d", &I);
+	printf("Column: "); scanf("%d", &J);
+	
+	if(game.state[I - 1][J - 1] != '_')
+	  printf("That's not a valid move. Try again.\n");
+	else
+	  legal = true;
+      }
+      
+      game.state[I - 1][J - 1] = xoro(pl);
       game.open--;
-    
+      
       if(terminal_test(game)) {
 	over = true;
 	winner = utility(game) / 10;
       }
-    
+      
       for(int i = 0; i < 3; i++) {
 	for(int j = 0; j < 3; j++) {
 	  printf("%c", game.state[i][j]);
@@ -317,7 +325,7 @@ int main() {
       }
     }  
     else {
-      minimax_decision(game);
+      game = minimax_decision(game);
       for(int i = 0; i < 3; i++) {
 	for(int j = 0; j < 3; j++) {
 	  printf("%c", game.state[i][j]);
@@ -327,11 +335,15 @@ int main() {
 	printf("\n");
       }
     }
-
-    if(pl == 1)
+    
+    if(turn == 1)
       turn = 2;
     else
       turn = 1;
+    
+    for(int i = 0; i < 10; i++)
+      printf("-");
+    printf("\n");
   }
   
   if(winner == W)
@@ -339,7 +351,7 @@ int main() {
   else if(winner == L)
     printf("Player 2 wins!\n");
   else
-    printf("It was a draw!");
+    printf("It was a draw!\n");
 
   return 0;
 }
