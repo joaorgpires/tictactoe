@@ -8,264 +8,148 @@ using namespace std;
 
 struct Node {
   char state[3][3];
-  int open;
   int u;
+  vector<Node*> nei; //childs
 };
 
-int pl;
-vector<Node> nei;
-bool over = false;
-int winner;
+int nodes = 0;
 
-bool terminal_test(Node cur) { //--------------------TERMINAL TEST
-  if((cur.state[0][0] == 'X' && cur.state[0][1] == 'X' && cur.state[0][2] == 'X')
-     || (cur.state[1][0] == 'X' && cur.state[1][1] == 'X' && cur.state[1][2] == 'X')
-     || (cur.state[2][0] == 'X' && cur.state[2][1] == 'X' && cur.state[2][2] == 'X')
-     || (cur.state[0][0] == 'X' && cur.state[1][1] == 'X' && cur.state[2][2] == 'X')
-     || (cur.state[2][0] == 'X' && cur.state[1][1] == 'X' && cur.state[0][2] == 'X'))
+bool terminal_test(Node* cur) { //--------------------TERMINAL TEST
+  if((cur->state[0][0] == 'X' && cur->state[0][1] == 'X' && cur->state[0][2] == 'X')
+     || (cur->state[1][0] == 'X' && cur->state[1][1] == 'X' && cur->state[1][2] == 'X')
+     || (cur->state[2][0] == 'X' && cur->state[2][1] == 'X' && cur->state[2][2] == 'X')
+     || (cur->state[0][0] == 'X' && cur->state[1][1] == 'X' && cur->state[2][2] == 'X')
+     || (cur->state[2][0] == 'X' && cur->state[1][1] == 'X' && cur->state[0][2] == 'X')
+     || (cur->state[0][0] == 'X' && cur->state[1][0] == 'X' && cur->state[2][0] == 'X')
+     || (cur->state[0][1] == 'X' && cur->state[1][1] == 'X' && cur->state[2][1] == 'X')
+     || (cur->state[0][2] == 'X' && cur->state[1][2] == 'X' && cur->state[2][2] == 'X'))
     return true;
   
-  else if((cur.state[0][0] == 'O' && cur.state[0][1] == 'O' && cur.state[0][2] == 'O')
-	  || (cur.state[1][0] == 'O' && cur.state[1][1] == 'O' && cur.state[1][2] == 'O')
-	  || (cur.state[2][0] == 'O' && cur.state[2][1] == 'O' && cur.state[2][2] == 'O')
-	  || (cur.state[0][0] == 'O' && cur.state[1][1] == 'O' && cur.state[2][2] == 'O')
-	  || (cur.state[2][0] == 'O' && cur.state[1][1] == 'O' && cur.state[0][2] == 'O'))
+  else if((cur->state[0][0] == 'O' && cur->state[0][1] == 'O' && cur->state[0][2] == 'O')
+	  || (cur->state[1][0] == 'O' && cur->state[1][1] == 'O' && cur->state[1][2] == 'O')
+	  || (cur->state[2][0] == 'O' && cur->state[2][1] == 'O' && cur->state[2][2] == 'O')
+	  || (cur->state[0][0] == 'O' && cur->state[1][1] == 'O' && cur->state[2][2] == 'O')
+	  || (cur->state[2][0] == 'O' && cur->state[1][1] == 'O' && cur->state[0][2] == 'O')
+	  || (cur->state[0][0] == 'O' && cur->state[1][0] == 'O' && cur->state[2][0] == 'O')
+	  || (cur->state[0][1] == 'O' && cur->state[1][1] == 'O' && cur->state[2][1] == 'O')
+	  || (cur->state[0][2] == 'O' && cur->state[1][2] == 'O' && cur->state[2][2] == 'O'))
     return true;
   
-  else if(cur.open == 0)
-    return true;
-  
-  return false;
-}
-
-int row(Node cur, int C) { //---------------IS ROW UP FOR COUNT?
-  int x = 0, o = 0;
-  for(int i = 0; i < 2; i++) {
-    if(cur.state[i][C] == 'X')
-      x++;
-    else
-      o++;
-  }
-  
-  if(x > 0 && o > 0)
-    return 10;
-  else if(x > 0)
-    return W;
-  else if(o > 0)
-    return L;
-  return D;
-}
-
-int col(Node cur, int R) { //------------IS COLUMN UP FOR COUNT?
-  int x = 0, o = 0;
-  for(int i = 0; i < 2; i++) {
-    if(cur.state[R][i] == 'X')
-      x++;
-    else
-      o++;
-  }
-  
-  if(x > 0 && o > 0)
-    return 10;
-  else if(x > 0)
-    return W;
-  else if(o > 0)
-    return L;
-  return D;
-}
-
-int diag1(Node cur) { //-----------IS DIAGONAL1 UP FOR COUNT?
-  int ans = 0;
-  int x = 0, o = 0;
-  
-  if(cur.state[0][0] == 'X' || cur.state[1][1] == 'X' || cur.state[2][2] == 'X')
-    x++;
-  if(cur.state[0][0] == 'O' || cur.state[1][1] == 'O' || cur.state[2][2] == 'O')
-    o++;
-    
-  if(x > 0 && o > 0)
-    ans = 10;
-  else if(x > 0)
-    ans = W;
-  else if(o > 0)
-    ans = L;
-  else
-    ans = D;
-
-  return ans;
-}
-
-int diag2(Node cur) { //-----------IS DIAGONAL2 UP FOR COUNT?
-  int ans = 0;
-  int x = 0, o = 0;
-  
-  if(cur.state[0][0] == 'X' || cur.state[1][1] == 'X' || cur.state[2][2] == 'X')
-    x++;
-  if(cur.state[0][0] == 'O' || cur.state[1][1] == 'O' || cur.state[2][2] == 'O')
-    o++;
-  
-  if(x > 0 && o > 0)
-    ans = 10;
-  else if(x > 0)
-    ans = W;
-  else if(o > 0)
-    ans = L;
-  else
-    ans = D;
-
-  return ans;
-}
-
-int diff(Node cur) { //--------------------------DIFF = MAX - MIN
-  int min = 0, max = 0;
-  
-  for(int i = 0; i < 2; i++) {
-    int r = row(cur, i), c = col(cur, i), d1 = diag1(cur), d2 = diag2(cur);
-    //----------------------ROWS
-    if(r == W)
-      max++;
-    else if(r == L)
-      min++;
-    else {
-      min++;
-      max++;
-    }
-    
-    //-------------------COLUMNS
-    if(c == W)
-      max++;
-    else if(c == L)
-      min++;
-    else {
-      min++;
-      max++;
-    }
-    
-    if(d1 == W)
-      max++;
-    else if(d1 == L)
-      min++;
-    else {
-      min++;
-      max++;
-    }
-
-    if(d2 == W)
-      max++;
-    else if(d2 == L)
-      min++;
-    else {
-      min++;
-      max++;
-    }
-  }
-  
-  return max - min;
-}
-
-int utility(Node cur) { //-------------------------FUNCTION UTILITY
-  if((cur.state[0][0] == 'X' && cur.state[0][1] == 'X' && cur.state[0][2] == 'X')
-     || (cur.state[1][0] == 'X' && cur.state[1][1] == 'X' && cur.state[1][2] == 'X')
-     || (cur.state[2][0] == 'X' && cur.state[2][1] == 'X' && cur.state[2][2] == 'X')
-     || (cur.state[0][0] == 'X' && cur.state[1][1] == 'X' && cur.state[2][2] == 'X')
-     || (cur.state[2][0] == 'X' && cur.state[1][1] == 'X' && cur.state[0][2] == 'X'))
-    return W * 10;
-  
-  else if((cur.state[0][0] == 'X' && cur.state[0][1] == 'X' && cur.state[0][2] == 'X')
-	  || (cur.state[1][0] == 'X' && cur.state[1][1] == 'X' && cur.state[1][2] == 'X')
-	  || (cur.state[2][0] == 'X' && cur.state[2][1] == 'X' && cur.state[2][2] == 'X')
-	  || (cur.state[0][0] == 'X' && cur.state[1][1] == 'X' && cur.state[2][2] == 'X')
-	  || (cur.state[2][0] == 'X' && cur.state[1][1] == 'X' && cur.state[0][2] == 'X'))
-    return L * 10;
-  
-  else if(cur.open == 0)
-    return D;
-  
-  else
-    return diff(cur);
-}
-
-Node setVal(Node cur) {
-  Node next;
-  next.open = cur.open;
   for(int i = 0; i < 3; i++) {
     for(int j = 0; j < 3; j++) {
-      next.state[i][j] = cur.state[i][j];
+      if(cur->state[i][j] == '_')
+	return false;
+    }
+  }
+  
+  return true;
+}
+
+int utility(Node* cur) { //-------------------------FUNCTION UTILITY
+  if((cur->state[0][0] == 'X' && cur->state[0][1] == 'X' && cur->state[0][2] == 'X')
+     || (cur->state[1][0] == 'X' && cur->state[1][1] == 'X' && cur->state[1][2] == 'X')
+     || (cur->state[2][0] == 'X' && cur->state[2][1] == 'X' && cur->state[2][2] == 'X')
+     || (cur->state[0][0] == 'X' && cur->state[1][1] == 'X' && cur->state[2][2] == 'X')
+     || (cur->state[2][0] == 'X' && cur->state[1][1] == 'X' && cur->state[0][2] == 'X')
+     || (cur->state[0][0] == 'X' && cur->state[1][0] == 'X' && cur->state[2][0] == 'X')
+     || (cur->state[0][1] == 'X' && cur->state[1][1] == 'X' && cur->state[2][1] == 'X')
+     || (cur->state[0][2] == 'X' && cur->state[1][2] == 'X' && cur->state[2][2] == 'X'))
+    return W;
+  
+  else if((cur->state[0][0] == 'O' && cur->state[0][1] == 'O' && cur->state[0][2] == 'O')
+	  || (cur->state[1][0] == 'O' && cur->state[1][1] == 'O' && cur->state[1][2] == 'O')
+	  || (cur->state[2][0] == 'O' && cur->state[2][1] == 'O' && cur->state[2][2] == 'O')
+	  || (cur->state[0][0] == 'O' && cur->state[1][1] == 'O' && cur->state[2][2] == 'O')
+	  || (cur->state[2][0] == 'O' && cur->state[1][1] == 'O' && cur->state[0][2] == 'O')
+	  || (cur->state[0][0] == 'O' && cur->state[1][0] == 'O' && cur->state[2][0] == 'O')
+	  || (cur->state[0][1] == 'O' && cur->state[1][1] == 'O' && cur->state[2][1] == 'O')
+	  || (cur->state[0][2] == 'O' && cur->state[1][2] == 'O' && cur->state[2][2] == 'O'))
+    return L;
+    
+  return D;
+}
+
+Node* setVal(Node* cur) {
+  Node* next = new Node();
+  for(int i = 0; i < 3; i++) {
+    for(int j = 0; j < 3; j++) {
+      next->state[i][j] = cur->state[i][j];
     }
   }
   
   return next;
 }
 
-int max_value();
-int min_value();
+int minimax_value(Node* cur, int turn);
 
-Node minimax_decision(Node cur) {
-  if(terminal_test(cur)) {
-    winner = utility(cur) / 10;
-    over = true;
-    return cur;
+Node* minimax_decision(Node* cur, int turn) {
+  int v = minimax_value(cur, turn);
+  int sz = cur->nei.size();
+  Node* ans = new Node();
+  
+  for(int i = 0; i < sz; i++) {
+    if(v == cur->nei[i]->u) {
+      ans = setVal(cur->nei[i]);
+      break;
+    }
   }
   
+  return ans;
+}
+
+int minimax_value(Node* cur, int turn) {
+  //printf("%d\n", turn);
+  if(terminal_test(cur)) {
+    //printf("utility: %d\n", utility(cur));
+    cur->u = utility(cur);
+    return utility(cur);
+  }
+
   for(int i = 0; i < 3; i++) {
     for(int j = 0; j < 3; j++) {
-      if(cur.state[i][j] == '_') {
-	Node next = setVal(cur);
-	next.open--;
-	if(pl == 1)
-	  next.state[i][j] = 'O';
-	else
-	  next.state[i][j] = 'X';
-	nei.push_back(next);
+      if(cur->state[i][j] == '_') {
+	nodes++;
+	Node* next = new Node();
+	next = setVal(cur);
+	if(turn == 1) {
+	  next->state[i][j] = 'X';
+	  cur->nei.push_back(next);
+	}
+	else {
+	  next->state[i][j] = 'O';
+	  cur->nei.push_back(next);
+	}
       }
     }
   }
-
-  int sz = nei.size();
   
-  //printf("%d\n", sz);
-  
-  if(pl == 1) {
-    int v = min_value();
+  if(turn == 1) {
+    int best = -INF;
+    int sz = cur->nei.size();
+    //printf("size %d\n", sz);
     for(int i = 0; i < sz; i++) {
-      Node move = nei[i];
-      if(move.u == v)
-	cur = setVal(move);
+      int v = minimax_value(cur->nei[i], 2);
+      best = max(best, v);
+      //printf("best: %d\n", best);
     }
-  }
-  else {
-    int v = max_value();
-    for(int i = 0; i < sz; i++) {
-      Node move = nei[i];
-      if(move.u == v)
-	cur = setVal(move);
-    }
+    
+    //printf("returned: %d\n", best);
+    cur->u = best;
+    return best;
   }
   
-  nei.clear();
-  return cur;
-}
-
-int max_value() {
-  int v = -INF;
-  int sz = nei.size();
+  int best = INF;
+  int sz = cur->nei.size();
+  //printf("size %d\n", sz);
   for(int i = 0; i < sz; i++) {
-    v = max(utility(nei[i]), v);
-    nei[i].u = v;
+    int v = minimax_value(cur->nei[i], 1);
+    best = min(best, v);
+    //printf("best: %d\n", best);
   }
   
-  return v;
-}
-
-int min_value() {
-  int v = INF;
-  int sz = nei.size();
-  for(int i = 0; i < sz; i++) {
-    v = min(utility(nei[i]), v);
-    nei[i].u = v;
-  }
-  
-  return v;
+  //printf("returned: %d\n", best);
+  cur->u = best;
+  return best;
 }
 
 char xoro(int m) {
@@ -275,22 +159,23 @@ char xoro(int m) {
 }
 
 int main() {
-  Node game;
-  game.open = 9;
+  Node* game = new Node();
   for(int i = 0; i < 3; i++) {
     for(int j = 0; j < 3; j++) {
-      game.state[i][j] = '_';
+      game->state[i][j] = '_';
     }
   }
   
   printf("Player 1 or 2? ");
-  scanf("%d", &pl); //player1 or player2
+  int pl; scanf("%d", &pl); //player1 or player2
   if(pl != 1 && pl != 2) {
     printf("That is not a player. Try again.\n");
     return 0;
   }
   
   int turn = 1;
+  bool over = false;
+  int winner;
   
   while(!over) {
     if(turn == pl) {
@@ -301,39 +186,41 @@ int main() {
 	printf("Row: "); scanf("%d", &I);
 	printf("Column: "); scanf("%d", &J);
 	
-	if(game.state[I - 1][J - 1] != '_')
-	  printf("That's not a valid move. Try again.\n");
+	if(game->state[I - 1][J - 1] != '_')
+	  printf("That's not a legal move. Try again.\n");
 	else
 	  legal = true;
       }
       
-      game.state[I - 1][J - 1] = xoro(pl);
-      game.open--;
-      
-      if(terminal_test(game)) {
-	over = true;
-	winner = utility(game) / 10;
-      }
+      game->state[I - 1][J - 1] = xoro(pl);
       
       for(int i = 0; i < 3; i++) {
 	for(int j = 0; j < 3; j++) {
-	  printf("%c", game.state[i][j]);
+	  printf("%c", game->state[i][j]);
 	  if(j != 2)
 	    printf("|");
 	}
 	printf("\n");
       }
-    }  
+    }
     else {
-      game = minimax_decision(game);
+      nodes = 0;
+      clock_t t1,t2;
+      t1=clock();
+      game = setVal(minimax_decision(game, turn));
+      t2=clock();
+      float diff = ((float)t2-(float)t1) / CLOCKS_PER_SEC;      
+      printf("%d node(s) were generated.\n", nodes);
+      cout << "Decision made in: " << diff << " seconds." << endl;
+      
       for(int i = 0; i < 3; i++) {
 	for(int j = 0; j < 3; j++) {
-	  printf("%c", game.state[i][j]);
+	  printf("%c", game->state[i][j]);
 	  if(j != 2)
 	    printf("|");
 	}
 	printf("\n");
-      }
+      }  
     }
     
     if(turn == 1)
@@ -341,9 +228,15 @@ int main() {
     else
       turn = 1;
     
+    
     for(int i = 0; i < 10; i++)
       printf("-");
     printf("\n");
+    
+    if(terminal_test(game)) {
+      over = true;
+      winner = utility(game);
+    }    
   }
   
   if(winner == W)
