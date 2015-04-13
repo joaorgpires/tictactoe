@@ -159,92 +159,109 @@ char xoro(int m) {
 }
 
 int main() {
-  Node* game = new Node();
-  for(int i = 0; i < 3; i++) {
-    for(int j = 0; j < 3; j++) {
-      game->state[i][j] = '_';
-    }
-  }
-  
-  printf("Player 1 or 2? ");
-  int pl; scanf("%d", &pl); //player1 or player2
-  if(pl != 1 && pl != 2) {
-    printf("That is not a player. Try again.\n");
-    return 0;
-  }
-  
-  int turn = 1;
-  bool over = false;
-  int winner;
-  
-  while(!over) {
-    if(turn == pl) {
-      int I,J;
-      printf("Where do you wish to play?\n");
-      bool legal = false;
-      while(!legal) {
-	printf("Row: "); scanf("%d", &I);
-	printf("Column: "); scanf("%d", &J);
-	
-	if(game->state[I - 1][J - 1] != '_')
-	  printf("That's not a legal move. Try again.\n");
-	else
-	  legal = true;
-      }
-      
-      game->state[I - 1][J - 1] = xoro(pl);
-      
-      for(int i = 0; i < 3; i++) {
-	for(int j = 0; j < 3; j++) {
-	  printf("%c", game->state[i][j]);
-	  if(j != 2)
-	    printf("|");
-	}
-	printf("\n");
-      }
-    }
-    else {
-      nodes = 0;
-      clock_t t1,t2;
-      t1=clock();
-      game = setVal(minimax_decision(game, turn));
-      t2=clock();
-      float diff = ((float)t2-(float)t1) / CLOCKS_PER_SEC;      
-      printf("%d node(s) were generated.\n", nodes);
-      cout << "Decision made in: " << diff << " seconds." << endl;
-      
-      for(int i = 0; i < 3; i++) {
-	for(int j = 0; j < 3; j++) {
-	  printf("%c", game->state[i][j]);
-	  if(j != 2)
-	    printf("|");
-	}
-	printf("\n");
-      }  
-    }
-    
-    if(turn == 1)
-      turn = 2;
-    else
-      turn = 1;
-    
-    
-    for(int i = 0; i < 10; i++)
-      printf("-");
-    printf("\n");
-    
-    if(terminal_test(game)) {
-      over = true;
-      winner = utility(game);
-    }    
-  }
-  
-  if(winner == W)
-    printf("Player 1 wins!\n");
-  else if(winner == L)
-    printf("Player 2 wins!\n");
-  else
-    printf("It was a draw!\n");
+  bool again = true;
 
+  while(again) {
+    Node* game = new Node();
+    for(int i = 0; i < 3; i++) {
+      for(int j = 0; j < 3; j++) {
+	game->state[i][j] = '_';
+      }
+    }
+    
+    bool legal = false;
+    int pl;
+    
+    while(!legal) {
+      printf("Player 1 or 2? ");
+      scanf("%d", &pl); //player1 or player2
+      if(pl != 1 && pl != 2) {
+	printf("That is not a player. Try again.\n");
+      }
+      else
+	legal = true;
+    }
+    
+    int turn = 1;
+    bool over = false;
+    int winner;
+    
+    while(!over) {
+      if(turn == pl) {
+	int I,J;
+	printf("Where do you wish to play?\n");
+	bool legal = false;
+	while(!legal) {
+	  printf("Row: "); scanf("%d", &I);
+	  printf("Column: "); scanf("%d", &J);
+	
+	  if(game->state[I - 1][J - 1] != '_')
+	    printf("That's not a legal move. Try again.\n");
+	  else
+	    legal = true;
+	}
+      
+	game->state[I - 1][J - 1] = xoro(pl);
+      
+	for(int i = 0; i < 3; i++) {
+	  for(int j = 0; j < 3; j++) {
+	    printf("%c", game->state[i][j]);
+	    if(j != 2)
+	      printf("|");
+	  }
+	  printf("\n");
+	}
+      }
+      else {
+	nodes = 0;
+	clock_t t1,t2;
+	t1=clock();
+	game = setVal(minimax_decision(game, turn));
+	t2=clock();
+	float diff = ((float)t2-(float)t1) / CLOCKS_PER_SEC;      
+	printf("%d node(s) were generated.\n", nodes);
+	cout << "Decision made in: " << diff << " seconds." << endl;
+      
+	for(int i = 0; i < 3; i++) {
+	  for(int j = 0; j < 3; j++) {
+	    printf("%c", game->state[i][j]);
+	    if(j != 2)
+	      printf("|");
+	  }
+	  printf("\n");
+	}  
+      }
+    
+      if(turn == 1)
+	turn = 2;
+      else
+	turn = 1;
+    
+    
+      for(int i = 0; i < 10; i++)
+	printf("-");
+      printf("\n");
+    
+      if(terminal_test(game)) {
+	over = true;
+	winner = utility(game);
+      }    
+    }
+  
+    if(winner == W)
+      printf("Player 1 wins!\n");
+    else if(winner == L)
+      printf("Player 2 wins!\n");
+    else
+      printf("It was a draw!\n");
+    
+    printf("Want to play again? Yes or no?\n");
+    char buff[20];
+    scanf(" %s", buff);
+    
+    if(strcmp(buff, "n") == 0 || strcmp(buff, "no") == 0)
+      again = false;
+  }
+  
   return 0;
 }

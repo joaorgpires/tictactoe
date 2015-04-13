@@ -1,0 +1,15 @@
+Para correr cada um dos ficheiros compilados, deve correr-se no terminal o ficheiro minimax, para o caso do algoritmo minimax, ou o ficheiro alphabeta, para o caso do algoritmo alpha-beta. Para tal, basta executar no terminal os comandos ./minimax ou ./alphabeta, respectivamente.
+
+Cada um dos programas dá indicações de como deve ser introduzido o output. No final de cada jogo, pode-se escolher se se pretente jogar de novo, ou não.
+
+Cada ficheiro c++ tem um nome que identifica o algoritmo utilizado:
+minimax.cpp: Minimax
+alphabeta.cpp: Alpha-beta
+
+Para compilar cada ficheiro, basta utilizar um compilador (exemplo: g++) e introduzir o seguinte comando:
+g++ -Wall *nome_do_ficheiro*.cpp, em que -Wall e opcional, e nome_do_ficheiro deve ser substituido pelo nome do ficheiro.
+
+Para executar, basta correr o ficheiro a.out, ficheiro que e gerado automaticamente pelo compilador. Para tal, basta escrever no terminal o comando ./a.out
+Pode também acrescentar-se -o *nome-escolhido-para-ficheiro-compilado*, sendo que este comando produz um ficheiro com nome "nome-escolhido-para-ficheiro-compilado".
+
+Estes algoritmos foram produzidos e compilados numa máquina com Ubuntu 14.04 instalado, sendo que o compilador utilizado foi o g++, versão 4.8.2.
